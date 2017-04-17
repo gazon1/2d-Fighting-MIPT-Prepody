@@ -4,33 +4,34 @@
 #include <SFML/Graphics.hpp>
 #include "fighter.h"
 #include "Array.h"
+#include "Timer.h"
 
 enum class Direction;
 
-//-----Сам Двигатель
 class Engine {
-public:	
+public:
 	Engine(Fighter* Fighter1, Fighter* Fighter2);
+	Engine();
 	~Engine();
-	
-	void HandleInput(); //Обработка всех нажатий
-	void Update();
+	void Initilize(Fighter* Fighter1, Fighter* Fighter2);
+	void HandleInput(); //Обработка всех нажатий и часть логики
+	void Update(); //Часть логики здесь
 	void Render(); //Отрисовка
-	sf::RenderWindow* GetWindow();
+	sf::RenderWindow& GetWindow();
+	void CloseWindow();
 	
-	//Ф-ии для движения героев
-	sf::Time GetElapsed();
-	void RestartClock();  //TODO: Где-нибудь в game loop поставить вызова этой ф-ии
-	
-	
+	bool is_ok();
+	void Set_Timer(Timer* l_Timer);
 private:
 	Array m_ar;
-	
-	sf::Clock m_clock;
-	sf::Time m_elapsed;
+	//Таймер, Общий для всех(Так сделано для синхронизации времени между объектами)
+	Timer* m_Timer = new Timer();
 	
 	void proceed_event(sf::Event l_event);
 	
 	sf::RenderWindow m_window;
+	
+	//Если окно не хотят закрыть, то все ok
+	bool ok = true;
 };
 #endif
