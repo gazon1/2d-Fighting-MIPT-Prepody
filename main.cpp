@@ -1,16 +1,25 @@
 #include "Engine.h"
+#include "Exception.h"
+using MyException::Exception;
 
 int main(int argc, char** argv) {
-	Engine eng;
-	eng.Initilize(new Fighter(eng.GetWindow()), new Fighter(eng.GetWindow()));
 	
-	while (eng.is_ok()) {
-		eng.HandleInput();
-		eng.Update();
-		eng.Render();
+	try {
+		MyEngine::Engine eng;
+		
+		eng.AddPlayer(new Fighter(true, false));
+		eng.AddPlayer(new Fighter(false, false));
+		
+		while (!eng.IsWindowToBeClosed()) {
+			eng.Update();
+			eng.logic();
+			eng.draw();
+		}
+	} catch (Exception e) {
+		std::cerr << e.user_what() << std::endl;
+	} catch (std::exception e) {
+		std::cerr << e.what() << std::endl;
 	}
-	
-	eng.CloseWindow();	
-	
+		
 	return 0;
 }
