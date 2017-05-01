@@ -1,37 +1,62 @@
 #ifndef ENGINE_H_
 #define ENGINE_H_
 
+#include "Exception.h"
+using MyException::Exception;
+using MyException::ExcType;
+
+#include <iostream>
+#include "const.h"
+
+#include "Window.h"
+using MyWindow::Window;
+
 #include <SFML/Graphics.hpp>
+using sf::RenderWindow;
+using sf::VideoMode;
+using sf::Color;
+using sf::Keyboard;
+using sf::Event;
+
 #include "fighter.h"
-#include "Array.h"
+
+#include "objects.h" //замена для Array.h
+using MyObjects::ArrayOfObjects;
+
 #include "Timer.h"
 
 enum class Direction;
 
-class Engine {
-public:
-	Engine(Fighter* Fighter1, Fighter* Fighter2);
-	Engine();
-	~Engine();
-	void Initilize(Fighter* Fighter1, Fighter* Fighter2);
-	void HandleInput(); //Обработка всех нажатий и часть логики
-	void Update(); //Часть логики здесь
-	void Render(); //Отрисовка
-	sf::RenderWindow& GetWindow();
-	void CloseWindow();
+namespace MyEngine {
 	
-	bool is_ok();
-	void Set_Timer(Timer* l_Timer);
-private:
-	Array m_ar;
-	//Таймер, Общий для всех(Так сделано для синхронизации времени между объектами)
-	Timer* m_Timer = new Timer();
 	
-	void proceed_event(sf::Event l_event);
-	
-	sf::RenderWindow m_window;
-	
-	//Если окно не хотят закрыть, то все ok
-	bool ok = true;
-};
+	class Engine {
+	public:
+		void AddPlayer(Fighter* l_Fighter);
+		void AddObject(Object* l_Object); 
+		Engine();
+		~Engine();
+		
+		void Update();
+		void logic();
+		void draw();
+		
+		Window* GetWindow();
+		bool IsWindowToBeClosed();
+		
+		EventManager* GetEventManager();
+		void Set_Timer(Timer* l_Timer);
+		
+		//для теста:
+		void changeColor(EventDetails* e);
+		
+	private:
+		ArrayOfObjects* m_ar = nullptr;
+		Fighter* m_LeftPlayer = nullptr;
+		Fighter* m_RightPlayer = nullptr;
+		Timer* m_Timer = nullptr;// = new Timer(); //Таймер, Общий для всех(Так сделано для синхронизации времени между объектами)
+		Window* m_window = nullptr;// = new Window(MyConst::TitleOfMainWindow, MyConst::DefaultSizeOfMainWindow);
+		Window pm_window;
+	};
+}
 #endif
