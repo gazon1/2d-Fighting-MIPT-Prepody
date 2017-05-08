@@ -41,9 +41,9 @@ namespace MyEventManager {
 		string delimiter = ":";
 	
 		ifstream bindings;
-		bindings.open(MyConst::PathToPlayerSettings);
+		bindings.open(MyConst::PathToEventCommandsSettings);
 		if (!bindings.is_open()) {
-			string msg = "No " + MyConst::PathToPlayerSettings;
+			string msg = "No " + MyConst::PathToEventCommandsSettings;
 			throw Exception(ExcType::fileNotFound, msg);
 		}
 		

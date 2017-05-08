@@ -3,27 +3,42 @@
 namespace MyWindow {
 	
 	Window::Window(){ 
-		Setup("Window", sf::Vector2u(640,480));
+		Setup("Window", Vector2u(640,480));
 	}
 	
-	Window::Window(const std::string& title, const sf::Vector2u& size){ 
+	Window::Window(const string& title, const Vector2u& size) {
 		Setup(title,size);
 	}
 	
-	Window::~Window(){ m_window.close(); }
+	Window::~Window() {
+		m_window.close();
+		
+		delete m_eventManager;
+		m_eventManager = nullptr;
+		
+		delete m_realTimeInputManager;
+		m_realTimeInputManager = nullptr;
+	}
 	
-	void Window::Setup(const std::string& title, const sf::Vector2u& size){
+	void Window::Setup(const string& title, const Vector2u& size){
+		
+		m_eventManager = new EventManager();
+		m_realTimeInputManager = new RealTimeInputManager();
+		
+		if (m_eventManager == nullptr ||
+			m_realTimeInputManager == nullptr)
+		{
+			throw Exception(ExcType::badAlloc, "In Window Constructor");
+		}
+		
 		m_windowTitle = title;
 		m_windowSize = size;
 		m_isFullscreen = false;
 		m_isDone = false;
 		m_isFocused = true;
 	
-		m_eventManager.AddCallback("Fullscreen_toggle", &Window::ToggleFullscreen,this);
-		m_eventManager.AddCallback("Window_close", &Window::Close, this);
-		//Для теста
-		m_eventManager.AddCallback("Window_changeBackground", &Window::changeBackground, this);
-	
+		m_eventManager->AddCallback("Fullscreen_toggle", &Window::ToggleFullscreen,this);
+		m_eventManager->AddCallback("Window_close", &Window::Close, this);	
 	
 		Create();
 	}
@@ -42,9 +57,10 @@ namespace MyWindow {
 	bool Window::IsFullscreen(){ return m_isFullscreen; }
 	bool Window::IsFocused(){ return m_isFocused; }
 	
-	sf::RenderWindow& Window::GetRenderWindow(){ return m_window; }
-	EventManager* Window::GetEventManager(){ return &m_eventManager; }
-	sf::Vector2u Window::GetWindowSize(){ return m_windowSize; }
+	RenderWindow& Window::GetRenderWindow(){ return m_window; }
+	EventManager* Window::GetEventManager(){ return m_eventManager; }
+	RealTimeInputManager* Window::GetRealTimeInputManager() { return m_realTimeInputManager; }
+	Vector2u Window::GetWindowSize(){ return m_windowSize; }
 	
 	void Window::ToggleFullscreen(EventDetails* l_details){
 		m_isFullscreen = !m_isFullscreen;
@@ -58,19 +74,14 @@ namespace MyWindow {
 		sf::Event event;
 	
 		while(m_window.pollEvent(event)){
-			if (event.type == sf::Event::LostFocus){ m_isFocused = false; m_eventManager.SetFocus(false); }
-			else if (event.type == sf::Event::GainedFocus){ m_isFocused = true; m_eventManager.SetFocus(true); }
-			m_eventManager.HandleEvent(event);
+			if (event.type == Event::LostFocus){ m_isFocused = false; m_eventManager->SetFocus(false); }
+			else if (event.type == Event::GainedFocus){ m_isFocused = true; m_eventManager->SetFocus(true); }
+			m_eventManager->HandleEvent(event);
 		}
-	
-		m_eventManager.Update();
-		//~ m_realTimeInputManager.Update();
-	}
-	
-	//для теста:
-	void Window::changeBackground(EventDetails* l_details) {
-		BackgroundColor = sf::Color::Green;
-		std::cout << "Changing Color of background" << l_details->m_keyCode << std::endl;
+		
+		m_eventManager->Update();
+		m_realTimeInputManager->HandleRealTimeInput();
+		m_realTimeInputManager->Update();
 	}
 
 }
