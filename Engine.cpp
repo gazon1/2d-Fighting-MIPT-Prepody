@@ -1,14 +1,15 @@
 #include "Engine.h"
 namespace MyEngine {
 	
-	void Engine::Set_Timer(Timer* l_Timer) {
-		m_Timer = l_Timer;
-	}
-	bool Engine::IsWindowToBeClosed() {
-		return m_window->IsDone();
-	}
+	//~ void Engine::CalcPanch() {
+		//~ for (int i = 0; i < m_ar.count; ++i) {
+			//~ if (m_ar[i].isFighter) {
+				//~ if (m_ar[i]		
+			//~ }
+		//~ }
+	//~ }
 	
-	Engine::Engine() {
+	void Engine::Setup() {
 		m_window = new Window(MyConst::TitleOfMainWindow, 
 							  MyConst::DefaultSizeOfMainWindow);
 		m_Timer = new Timer();
@@ -25,7 +26,18 @@ namespace MyEngine {
 		//Устанавливаем свзяку событие - функция changeColor():
 		m_window->GetEventManager()->AddCallback("change_LeftPlayerColor", &Engine::changeColor, this);
 		
-		m_Timer->RestartClock();
+		m_Timer->RestartClock();	
+	}
+	
+	void Engine::Set_Timer(Timer* l_Timer) {
+		m_Timer = l_Timer;
+	}
+	bool Engine::IsWindowToBeClosed() {
+		return m_window->IsDone();
+	}
+	
+	Engine::Engine() {
+		Setup();
 	}
 	
 	Window* Engine::GetWindow() {

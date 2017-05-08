@@ -47,10 +47,15 @@ namespace MyEngine {
 		EventManager* GetEventManager();
 		void Set_Timer(Timer* l_Timer);
 		
+		//Подсчитать результат удара
+		//~ void CalcPanch();
+		
 		//для теста:
 		void changeColor(EventDetails* e);
 		
 	private:
+		void Setup();
+	
 		ArrayOfObjects* m_ar = nullptr;
 		Fighter* m_LeftPlayer = nullptr;
 		Fighter* m_RightPlayer = nullptr;

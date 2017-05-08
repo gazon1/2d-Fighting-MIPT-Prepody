@@ -23,7 +23,7 @@ void Fighter::move() {
 				if (this->getPosition().x != size.x)
 				{
 					if (m_isInAir) {
-						m_velocity = Vector2f(m_incrementFlight.x, 0);
+						m_velocity.x = m_incrementFlight.x;
 					} else {
 						m_velocity = Vector2f(m_increment.x, 0);
 					}
@@ -35,7 +35,7 @@ void Fighter::move() {
 				if (this->getPosition().x != 0)
 				{
 					if (m_isInAir) {
-						m_velocity = Vector2f(-m_incrementFlight.x, 0);
+						m_velocity.x = -m_incrementFlight.x;
 					} else {
 						m_velocity = Vector2f(-m_increment.x, 0);
 					}
@@ -43,31 +43,37 @@ void Fighter::move() {
 					m_velocity.x = 0;
 				}	
 			break;
-		case Direction::Up:
-				if (m_isInAir) {
-					m_velocity += Vector2f(0, m_incrementFlight.y);
-				}
-			break;
+		//~ case Direction::Up:
+				//~ if (m_isInAir) {
+					//~ m_velocity += Vector2f(0, m_incrementFlight.y);
+				//~ }
+			//~ break;
 		case Direction::Down:
 				if (m_isInAir) {
-					m_velocity += Vector2f(0, -m_incrementFlight.y);
+					m_velocity = Vector2f(0, -m_incrementFlight.y);
 				} else {
 					//Если мы на земле и нажимаем вниз, то мы ни опутимся ниже
 					m_velocity.x = 0;
 				}
 			break;
 		case Direction::DownLeft:
-			if (m_position.x == 0) {
-				m_velocity = Vector2f(0, -m_incrementFlight.y);
-			} else {
+			//~ if (m_isInAir) {
+				//~ m_velocity = Vector2f(-m_incrementFlight.x, -m_incrementFlight.y);
+			//~ } else {
+				//~ //Если мы на земле и нажимаем вниз, то мы ни опутимся ниже
+				//~ m_velocity.x = 0;
+			//~ }
+			if (m_position.x >= 0) {
 				m_velocity = Vector2f(-m_incrementFlight.x, -m_incrementFlight.y);
+			} else {
+				m_velocity = Vector2f(0, -m_incrementFlight.y);
 			}
 			break;
 		case Direction::DownRight:
-			if (m_position.x == size.x - m_bodySize.x) {
-				m_velocity = Vector2f(0, -m_incrementFlight.y);
-			} else {
+			if (m_position.x <= size.x - m_bodySize.x) {
 				m_velocity = Vector2f(m_incrementFlight.x, -m_incrementFlight.y);
+			} else {
+				m_velocity = Vector2f(0, -m_incrementFlight.y);
 			}
 			break;
 		case Direction::Continue:
@@ -98,10 +104,9 @@ void Fighter::move() {
 	
 	float fElapsed = m_Timer->GetElapsed().asSeconds();
 	
-	if (size.y - m_position.y > m_bodySize.y + 0.1) {
-		m_acceleration.y = 5;
+	if (m_position.y < size.y - m_bodySize.y) {
+		m_acceleration.y = MyConst::accelerationOfFreeFall;
 		time_for_ac += fElapsed;
-		std::cout << "ac:: x:" << m_acceleration.x << "; y: " << m_acceleration.y << std::endl;
 	} else {
 		m_acceleration.y = 0;
 		time_for_ac = 0;
@@ -112,100 +117,58 @@ void Fighter::move() {
  	m_position.x += m_velocity.x * fElapsed + 0.5 * m_acceleration.x * pow(time_for_ac, 2);
 	m_position.y += m_velocity.y * fElapsed + 0.5 * m_acceleration.y * pow(time_for_ac, 2);
 	
+	//~ std::cout << m_isInAir;
+	
 }
 
-
-void Fighter::moveLeftPlayer(EventDetails* l_details) {
-	//для теста:
-	string temp;
+void Fighter::Jump() {
 	
-	switch (l_details->m_keyCode) {
-		case sf::Keyboard::D:
-			this->SetDirection(Direction::Right);
-			temp = "right";
-			break;
-		case sf::Keyboard::A:
-			this->SetDirection(Direction::Left);
-			temp = "left";
-			break;
-		case sf::Keyboard::W:
-			this->SetDirection(Direction::Down);
-			temp = "down";
-			break;
-		case sf::Keyboard::S:
-			this->SetDirection(Direction::Up);
-			temp = "up";
-			break;
-		case sf::Keyboard::Space:
-			m_isInAir = true;
-			this->SetDirection(Direction::Down);
-			
-			//(position.y - 5) - начальная координата
-			//вычисляется таким образом, чтобы избежать проверки
-			//условия на остановку в начале прыжка
-			this->setPosition(m_position.x, m_position.y - 5);
-			temp = "Space";
-			break;
+	if (!m_isInAir) {
+		m_isInAir = true;
+		this->SetDirection(Direction::Down);
+		//(position.y - 5) - начальная координата
+		//вычисляется таким образом, чтобы избежать проверки
+		//условия на остановку в начале прыжка
+		this->setPosition(m_position.x, m_position.y - 5);
+	}
+}
+
+void Fighter::JumpLeft() {
+
+	if (m_isInAir == false) {
+		m_isInAir = true;
+		this->SetDirection(Direction::DownLeft);
+		this->setPosition(m_position.x, m_position.y - 5);
 	}
 	
-	std::cout << "moving left player:_" << temp << "_;" << l_details->m_keyCode << std::endl;	
+	std::cout << "JumpLeft" << std::endl;
+	//~ Jump();
 }
 
-void Fighter::JumpLeft(EventDetails* l_details) {
-	m_isInAir = true;
-	this->SetDirection(Direction::DownLeft);
-	this->setPosition(m_position.x, m_position.y - 5);
-	
-	std::cout << "Jumpring Left" << std::endl;
-}
-
-void Fighter::JumpRight(EventDetails* l_details) {
-	m_isInAir = true;
-	this->SetDirection(Direction::DownRight);
-	this->setPosition(m_position.x, m_position.y - 5);
-	
-	std::cout << "Jumpring Right" << std::endl;
-}
-
-void Fighter::Move(EventDetails* l_details) {
-	std::cout << "Move!" << std::endl;
-}
-
-void Fighter::moveRightPlayer(EventDetails* l_details)  {
-	switch (l_details->m_keyCode) {
-		case sf::Keyboard::Right:
-			this->SetDirection(Direction::Right); 
-			break;
-		case sf::Keyboard::Left:
-			this->SetDirection(Direction::Left); 
-			break;
-		case sf::Keyboard::Up:
-			this->SetDirection(Direction::Up); 
-			break;
-		case sf::Keyboard::Down:
-			this->SetDirection(Direction::Down); 
-			break;
-		case sf::Keyboard::RControl:
-			m_isInAir = true;
-			this->SetDirection(Direction::Down);
-			
-			//(position.y - 5) - начальная координата
-			//вычисляется таким образом, чтобы избежать проверки
-			//условия на остановку в начале прыжка
-			this->setPosition(m_position.x, m_position.y - 5);
-			break;
+void Fighter::JumpRight() {
+	if (m_isInAir == false) {
+		m_isInAir = true;
+		this->SetDirection(Direction::DownRight);
+		this->setPosition(m_position.x, m_position.y - 5);
 	}
 	
-	std::cout << "moving right player" << std::endl;
+	std::cout << "JumpRight" << std::endl;
+	//~ Jump();
 }
 
-void Fighter::moveLeft(EventDetails* l_details) {
-	this->SetDirection(Direction::Left); 
+void Fighter::moveLeft() {
+	if (!m_isInAir) {
+		this->SetDirection(Direction::Left);
+	}
 }
 
-void Fighter::moveRight(EventDetails* l_details) {
+void Fighter::moveRight() {
 	this->SetDirection(Direction::Right); 
 }
+
+//~ void Fighter::PunchByArm() {
+	
+//~ }
 
 void Fighter::logic() {
 	move();
@@ -221,97 +184,48 @@ void Fighter::draw() {
 
 Fighter::Fighter(bool l_isRightPlayer, bool l_IsBot):
 	Object(), m_isRightPlayer(l_isRightPlayer), IsBot(l_IsBot)
-{	
+{		
 		m_velocity = Vector2f(0, 0);
 }
 
 void Fighter::Setup() {
 	if (!IsBot && m_isRightPlayer) {
 		
-		//Настраиваем движение по верт. и гор. осям
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveLeft_1",
+		m_window->GetRealTimeInputManager()->AddCallback("RightPlayer_moveLeft",
 			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveLeft_2",
-			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveLeft_3",
-			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveLeft_4",
-			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveLeft_5",
-			&Fighter::moveLeft, this);
-			
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveRight_1",
-			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveRight_2",
-			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveRight_3",
-			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveRight_4",
-			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_moveRight_5",
+		m_window->GetRealTimeInputManager()->AddCallback("RightPlayer_moveRight",
 			&Fighter::moveRight, this);
 			
 		//Настраиваем прыжки
-		m_window->GetEventManager()->AddCallback("RightPlayer_Jump",
-			&Fighter::moveRightPlayer, this);
+		m_window->GetRealTimeInputManager()->AddCallback("RightPlayer_Jump",
+			&Fighter::Jump, this);
+		m_window->GetRealTimeInputManager()->AddCallback("RightPlayer_JumpRight",
+			&Fighter::JumpRight, this);
 			
-		m_window->GetEventManager()->AddCallback("RightPlayer_JumpRight_1",
-			&Fighter::JumpRight, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_JumpRight_2",
-			&Fighter::JumpRight, this);
-		
-		m_window->GetEventManager()->AddCallback("RightPlayer_JumpLeft_1",
-			&Fighter::JumpLeft, this);
-		m_window->GetEventManager()->AddCallback("RightPlayer_JumpLeft_1",
+		m_window->GetRealTimeInputManager()->AddCallback("RightPlayer_JumpLeft",
 			&Fighter::JumpLeft, this);
 			
 	} else
 	if (!IsBot && !m_isRightPlayer) {
 		
-		//Настраиваем движение по верт. и гор. осям
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_1",
+		m_window->GetRealTimeInputManager()->AddCallback("LeftPlayer_moveLeft",
 			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_2",
-			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_3",
-			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_4",
-			&Fighter::moveLeft, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_5",
-			&Fighter::moveLeft, this);
-			
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_1",
+		m_window->GetRealTimeInputManager()->AddCallback("LeftPlayer_moveRight",
 			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_2",
-			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_3",
-			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_4",
-			&Fighter::moveRight, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_moveRight_5",
-			&Fighter::moveRight, this);
-			
-		//~ m_window->GetEventManager()->AddCallback("LeftPlayer_moveUp",
-			//~ &Fighter::moveLeftPlayer, this);
-		//~ m_window->GetEventManager()->AddCallback("LeftPlayer_moveDown",
-			//~ &Fighter::moveLeftPlayer, this);
 			
 		//Настраиваем прыжки
-		m_window->GetEventManager()->AddCallback("LeftPlayer_Jump",
-			&Fighter::moveLeftPlayer, this);
+		m_window->GetRealTimeInputManager()->AddCallback("LeftPlayer_Jump",
+			&Fighter::Jump, this);
 			
-		m_window->GetEventManager()->AddCallback("LeftPlayer_JumpRight_1",
-			&Fighter::JumpRight, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_JumpRight_2",
+		m_window->GetRealTimeInputManager()->AddCallback("LeftPlayer_JumpRight",
 			&Fighter::JumpRight, this);
 			
-		m_window->GetEventManager()->AddCallback("LeftPlayer_JumpLeft_1",
-			&Fighter::JumpLeft, this);
-		m_window->GetEventManager()->AddCallback("LeftPlayer_JumpLeft_2",
+		m_window->GetRealTimeInputManager()->AddCallback("LeftPlayer_JumpLeft",
 			&Fighter::JumpLeft, this);
 			
-		m_window->GetEventManager()->AddCallback("Move",
-			&Fighter::Move, this);
+		//Настраиваем удары
+		//~ m_window->GetRealTimeInputManager()->AddCallback("LeftPlayer_PunchByArm",
+			//~ &Fighter::PunchByArm, this);
 	}
 }
 

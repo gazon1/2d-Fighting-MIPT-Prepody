@@ -1,6 +1,10 @@
 #ifndef FIGHTER_H_
 #define FIGHTER_H_
 
+#include "const.h"
+
+#include "RealTimeInputManager.h"
+using MyRealTimeInputManager::RealTimeInputManager;
 
 #include <cmath>
 #include "Window.h"
@@ -16,7 +20,6 @@ using sf::RenderWindow;
 using MyObject::Object;
 
 enum class Direction {
-	//TODO: добавить UP-RIGHT, UP-LEFT и т.д.
 	None,
 	Continue, //двигаться по инерции
 	Right,
@@ -41,10 +44,8 @@ class Fighter: public Object
 	};
 	
 	Fighter(bool l_isRightPlayer, bool l_IsBot = false);
-	//~Fighter();
 	
 	void SetDirection(Direction l_dir);
-	void JumpFighter(float l_fElapsed); //TODO: реализовать
 
 	void setPosition(float x, float y);
 	Vector2f getPosition();
@@ -64,7 +65,7 @@ class Fighter: public Object
 	void Setup(); //вызвать эту функцию, после того, как Fighter получил окно
 	bool isRightPlayer();
 	
-	private:
+	private:	
 		Direction m_dir;
 		Timer* m_Timer;
 		
@@ -72,26 +73,22 @@ class Fighter: public Object
 		
 		bool m_isRightPlayer = false;
 		bool IsBot = false;
-		bool m_isFighterNotMoving = true;
 		bool m_isInAir = false;
 		
+		void Jump();
+		void JumpRight();
+		void JumpLeft();
 		
-		void moveRightPlayer(EventDetails* l_details);
-		void moveLeftPlayer(EventDetails* l_details);
-		void JumpRight(EventDetails* l_details);
-		void JumpLeft(EventDetails* l_details);
-		void Move(EventDetails* l_details);
-		
-		void moveLeft(EventDetails* l_details);
-		void moveRight(EventDetails* l_details);
+		void moveLeft();
+		void moveRight();
 		
 		void moveBot(); //TODO: реализовать логику поведения бота
 
 		FightChars m_chars;
 		
 		//m_increment - "константа скорости", а m_velocity уже меняется в зависимости от направления
-		const Vector2f m_increment = Vector2f(5500, 5500);
-		const Vector2f m_incrementFlight = Vector2f(500, 500);
+		const Vector2f m_increment = Vector2f(100, 100);
+		const Vector2f m_incrementFlight = Vector2f(100, 1000);
 		float time_for_ac = 0;
 		
 		//Созданием окна занимается Engine, Fighter может только принимать Window как параметр конструктора

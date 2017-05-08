@@ -1,6 +1,9 @@
 #ifndef WINDOW_H_
 #define WINDOW_H_
 
+#include "RealTimeInputManager.h"
+using MyRealTimeInputManager::RealTimeInputManager;
+
 #include <string>
 using std::string;
 
@@ -9,16 +12,11 @@ using std::string;
 #include <SFML/Graphics.hpp>
 using sf::RenderWindow;
 using sf::Vector2u;
+using sf::Event;
 
 #include "EventManager.h"
 using MyEventManager::EventManager;
 using MyEventManager::EventDetails;
-
-//~ #include "RealTimeInputManager.h"
-
-//~ #include "Exception.h"
-//~ using MyException::Exception;
-//~ using MyException::ExcType;
 
 namespace MyWindow {
 	
@@ -42,16 +40,16 @@ namespace MyWindow {
 		void Close(EventDetails* l_details = nullptr);
 	
 		RenderWindow& GetRenderWindow();
-		EventManager* GetEventManager();
-		Vector2u GetWindowSize();
 		
-		//для теста:
-		void changeBackground(EventDetails* l_EventDetails);
+		EventManager* GetEventManager();
+		RealTimeInputManager* GetRealTimeInputManager();
+		
+		Vector2u GetWindowSize();
 				
 	private:
 		RenderWindow m_window;
-		EventManager m_eventManager;
-		//~ RealTimeInputManager m_realTimeInputManager;
+		EventManager* m_eventManager = nullptr;
+		RealTimeInputManager* m_realTimeInputManager = nullptr;
 		
 		Vector2u m_windowSize;
 		string m_windowTitle;

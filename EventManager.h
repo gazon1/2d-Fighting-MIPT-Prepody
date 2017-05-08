@@ -89,7 +89,7 @@ namespace MyEventManager {
 		}
 	};
 	
-	//Events = [ [Событие; Кнопка, его вызывающая] ]
+	//Events = [ [Событие; Кнопка, его вызывающая] ] (кнопка может быть не одна)
 	using Events = vector<pair<EventType, EventInfo> >;
 	
 	
